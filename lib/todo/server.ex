@@ -41,7 +41,7 @@ defmodule Todo.Server do
     {:reply, current_list, {name, current_list}}
   end
 
-  def handle_cast({:clear_list}, {name, current_list}) do
+  def handle_cast({:clear_list}, {name, _current_list}) do
     new_state = Todo.List.new
     Todo.Database.store(name, new_state)
     {:noreply, {name, new_state}}
