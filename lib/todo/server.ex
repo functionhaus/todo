@@ -64,4 +64,8 @@ defmodule Todo.Server do
     Todo.Database.store(name, new_state)
     {:noreply, {name, new_state}}
   end
+
+  # Needed for testing purposes
+  def handle_info(:stop, state), do: {:stop, :normal, state}
+  def handle_info(_, state), do: {:noreply, state}
 end

@@ -23,10 +23,10 @@ defmodule Todo.Database do
   end
 
   def choose_worker(list_name) do
-    GenServer.call(:database_server, {:get_worker, list_name})
+    GenServer.call(:database_server, {:choose_worker, list_name})
   end
 
-  def handle_call({:get_worker, list_name}, _, workers) do
+  def handle_call({:choose_worker, list_name}, _, workers) do
     total_workers = workers |> Map.keys |> Enum.count
     worker_index = :erlang.phash2(list_name, total_workers)
     worker_pid = Map.get(workers, worker_index)
@@ -35,7 +35,7 @@ defmodule Todo.Database do
 
   defp start_workers(db_folder, total) do
     Enum.reduce(0..(total - 1), %{}, fn(index, workers) ->
-      worker_pid = Todo.Database.Worker.start(db_folder)
+      {:ok, worker_pid} = Todo.Database.Worker.start(db_folder)
       Map.put(workers, index, worker_pid)
     end)
   end
