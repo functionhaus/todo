@@ -15,9 +15,10 @@ defmodule Todo.DatabaseTest do
     Todo.Database.store(:name, "Jared")
     assert Todo.Database.get(:name) == "Jared"
 
-    # can we clean the database?
-    Todo.Database.cleanup
-    :timer.sleep(1)
-    refute File.exists?(dir_path)
+    # remove the created directory
+    File.rm_rf(dir_path)
+
+    # Exit the process because the server uses a registered name
+    Process.exit(server_pid, :kill)
   end
 end
