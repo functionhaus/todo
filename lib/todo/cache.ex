@@ -6,9 +6,7 @@ defmodule Todo.Cache do
   end
 
   def init(_) do
-    Path.join(__DIR__, "../../db")
-    |> Todo.Database.start_link
-
+    IO.puts "Starting todo cache."
     {:ok, %{}}
   end
 
