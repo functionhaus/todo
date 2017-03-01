@@ -1,10 +1,10 @@
 defmodule Todo.ServerTest do
   use ExUnit.Case, async: true
 
-  setup_all do
-    {:ok, cache_pid} = Todo.Cache.start_link
+  setup do
+    {:ok, pid} = Todo.Supervisor.start_link
     on_exit fn ->
-      Process.exit(cache_pid, :kill)
+      Process.exit(pid, :kill)
     end
 
     :ok

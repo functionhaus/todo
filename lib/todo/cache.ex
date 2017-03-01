@@ -7,7 +7,7 @@ defmodule Todo.Cache do
 
   def init(_) do
     Path.join(__DIR__, "../../db")
-    |> Todo.Database.start
+    |> Todo.Database.start_link
 
     {:ok, %{}}
   end
@@ -22,7 +22,7 @@ defmodule Todo.Cache do
         {:reply, todo_server, todo_servers}
 
       :error ->
-        {:ok, new_server} = Todo.Server.start(list_name)
+        {:ok, new_server} = Todo.Server.start_link(list_name)
 
         {
           :reply,
