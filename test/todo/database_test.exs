@@ -3,7 +3,6 @@ defmodule Todo.DatabaseTest do
 
   setup_all do
     dir_path = Path.join(__DIR__, "../tmp/some_folder")
-    Process.whereis(:database_server) |> Process.exit(:kill)
     {:ok, server_pid} = Todo.Database.start(dir_path)
 
     on_exit fn ->
