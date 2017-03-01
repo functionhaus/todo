@@ -1,9 +1,10 @@
 defmodule Todo.CacheTest do
   use ExUnit.Case, async: true
 
-  test "start the cache" do
-    {:ok, pid} = Todo.Cache.start
-    assert is_pid(pid)
+  setup_all do
+    {:ok, pid} = Todo.Cache.start_link
+    on_exit fn -> Process.exit(pid, :kill) end
+    :ok
   end
 
   test "init" do
@@ -12,15 +13,13 @@ defmodule Todo.CacheTest do
   end
 
   test "create and recall a server pid by name" do
-    {:ok, cache_pid} = Todo.Cache.start
-
-    server_pid = Todo.Cache.server_process(cache_pid, "Miko")
+    server_pid = Todo.Cache.server_process("Miko")
     assert is_pid(server_pid)
 
-    cached_server_pid = Todo.Cache.server_process(cache_pid, "Miko")
+    cached_server_pid = Todo.Cache.server_process("Miko")
     assert server_pid == cached_server_pid
 
-    another_server_pid = Todo.Cache.server_process(cache_pid, "Kranhaus")
+    another_server_pid = Todo.Cache.server_process("Kranhaus")
     refute server_pid == another_server_pid
   end
 end

@@ -1,9 +1,17 @@
 defmodule Todo.ServerTest do
   use ExUnit.Case, async: true
 
+  setup_all do
+    {:ok, cache_pid} = Todo.Cache.start_link
+    on_exit fn ->
+      Process.exit(cache_pid, :kill)
+    end
+
+    :ok
+  end
+
   test "starting the server" do
-    {:ok, cache_pid} = Todo.Cache.start
-    server_pid = Todo.Cache.server_process(cache_pid, "some_list")
+    server_pid = Todo.Cache.server_process("some_list")
     Todo.Server.clear_list(server_pid)
 
     assert is_pid(server_pid)
@@ -11,8 +19,7 @@ defmodule Todo.ServerTest do
   end
 
   test "adding and getting entries" do
-    {:ok, cache_pid} = Todo.Cache.start
-    server_pid = Todo.Cache.server_process(cache_pid, "some_list")
+    server_pid = Todo.Cache.server_process("some_list")
     Todo.Server.clear_list(server_pid)
 
     entries = [
@@ -29,8 +36,7 @@ defmodule Todo.ServerTest do
   end
 
   test "updating an entry" do
-    {:ok, cache_pid} = Todo.Cache.start
-    server_pid = Todo.Cache.server_process(cache_pid, "some_list")
+    server_pid = Todo.Cache.server_process("some_list")
     Todo.Server.clear_list(server_pid)
 
     Todo.Server.add_entry(
@@ -46,8 +52,7 @@ defmodule Todo.ServerTest do
   end
 
   test "delete an entry" do
-    {:ok, cache_pid} = Todo.Cache.start
-    server_pid = Todo.Cache.server_process(cache_pid, "some_list")
+    server_pid = Todo.Cache.server_process("some_list")
     Todo.Server.clear_list(server_pid)
 
     Todo.Server.add_entry(

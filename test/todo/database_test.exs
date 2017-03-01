@@ -1,12 +1,22 @@
 defmodule Todo.DatabaseTest do
   use ExUnit.Case, async: true
 
-  test "storing and getting data" do
+  setup_all do
     dir_path = Path.join(__DIR__, "../tmp/some_folder")
-
-    # start the server
+    Process.whereis(:database_server) |> Process.exit(:kill)
     {:ok, server_pid} = Todo.Database.start(dir_path)
-    assert is_pid(server_pid)
+
+    on_exit fn ->
+      # remove the created directory
+      File.rm_rf(dir_path)
+      Process.exit(server_pid, :kill)
+    end
+
+    {:ok, %{dir_path: dir_path}}
+  end
+
+  test "storing and getting data", context do
+    dir_path = context.dir_path
 
     # was the dir created?
     assert File.exists?(dir_path)
@@ -14,11 +24,5 @@ defmodule Todo.DatabaseTest do
     # do the store/get operations work?
     Todo.Database.store(:name, "Jared")
     assert Todo.Database.get(:name) == "Jared"
-
-    # remove the created directory
-    File.rm_rf(dir_path)
-
-    # Exit the process because the server uses a registered name
-    Process.exit(server_pid, :kill)
   end
 end
