@@ -9,7 +9,8 @@ defmodule Todo.Supervisor do
     db_path = Path.join(__DIR__, "../../db")
 
     processes = [
-      worker(Todo.Database, [db_path]),
+      worker(Todo.ProcessRegistry, []),
+      supervisor(Todo.Database, [db_path]),
       worker(Todo.Cache, [])
     ]
 

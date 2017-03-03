@@ -32,7 +32,7 @@ defmodule Todo.ProcessRegistry do
     GenServer.call(:process_registry, {:whereis_name, process_key})
   end
 
-  def handle_call({:register_name, process_key, pid}, registry) do
+  def handle_call({:register_name, process_key, pid}, _, registry) do
     case Map.get(registry, process_key) do
       nil ->
         Process.monitor(pid)
@@ -42,7 +42,7 @@ defmodule Todo.ProcessRegistry do
     end
   end
 
-  def handle_call({:whereis_name, process_key}, registry) do
+  def handle_call({:whereis_name, process_key}, _, registry) do
     {:reply, Map.get(registry, process_key, :undefined), registry}
   end
 
