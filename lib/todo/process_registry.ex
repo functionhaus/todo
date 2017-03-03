@@ -2,7 +2,7 @@ defmodule Todo.ProcessRegistry do
   use GenServer
   import Kernel, except: [send: 2]
 
-  def start_link
+  def start_link do
     GenServer.start_link(__MODULE__, nil, name: :process_registry)
   end
 
@@ -29,7 +29,7 @@ defmodule Todo.ProcessRegistry do
   end
 
   def whereis_name(process_key) do
-    GenServer.call(process_registry, {:whereis_name, process_key})
+    GenServer.call(:process_registry, {:whereis_name, process_key})
   end
 
   def handle_call({:register_name, process_key, pid}, registry) do
@@ -42,12 +42,12 @@ defmodule Todo.ProcessRegistry do
     end
   end
 
-  def handle_cast({:unregister_name, process_key}, registry) do
-    {:noreply, Map.delete(registry, process_key)}
-  end
-
   def handle_call({:whereis_name, process_key}, registry) do
     {:reply, Map.get(registry, process_key, :undefined), registry}
+  end
+
+  def handle_cast({:unregister_name, process_key}, registry) do
+    {:noreply, Map.delete(registry, process_key)}
   end
 
   def handle_info({:DOWN, _, :process, pid, _}, registry) do
@@ -61,11 +61,12 @@ defmodule Todo.ProcessRegistry do
       registry,
       registry,
       fn
-        ({registered_alias, registered_process}, registry_acc) when registered_process == pid ->
-          HashDict.delete(registry_acc, registered_alias)
+        ({process_key, process}, new_registry) when process == pid ->
+          Map.delete(new_registry, process_key)
 
-        (_, registry_acc) -> registry_acc
+        (_, new_registry) -> new_registry
       end
     )
+
   end
 end
