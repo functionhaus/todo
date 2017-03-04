@@ -6,14 +6,11 @@ defmodule Todo.Supervisor do
   end
 
   def init(_) do
-    db_path = Path.join(__DIR__, "../../db")
-
     processes = [
       worker(Todo.ProcessRegistry, []),
-      supervisor(Todo.Database, [db_path]),
-      worker(Todo.Cache, [])
+      supervisor(Todo.SystemSupervisor, [])
     ]
 
-    supervise(processes, strategy: :one_for_one)
+    supervise(processes, strategy: :rest_for_one)
   end
 end
