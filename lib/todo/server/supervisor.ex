@@ -17,7 +17,7 @@ defmodule Todo.Server.Supervisor do
   def init(_) do
     supervise(
       [worker(Todo.Server, [])],
-      strategy: :rest_for_one
+      strategy: :simple_one_for_one
     )
   end
 end
