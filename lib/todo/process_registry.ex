@@ -8,7 +8,9 @@ defmodule Todo.ProcessRegistry do
 
   def init(_) do
     IO.puts "Starting process registry."
-    {:ok, %{}}
+    IO.puts "Starting ETS table."
+    :ets.new(:registry_table, [:set, :named_table, :protected])
+    {:ok, nil}
   end
 
   def send(process_key, message) do
@@ -29,44 +31,32 @@ defmodule Todo.ProcessRegistry do
   end
 
   def whereis_name(process_key) do
-    GenServer.call(:process_registry, {:whereis_name, process_key})
-  end
-
-  def handle_call({:register_name, process_key, pid}, _, registry) do
-    case Map.get(registry, process_key) do
-      nil ->
-        Process.monitor(pid)
-        {:reply, :yes, Map.put(registry, process_key, pid)}
-      _ ->
-        {:reply, :no, registry}
+    case :ets.lookup(:registry_table, process_key) do
+      [{^process_key, pid}] -> pid
+      [] -> :undefined
     end
   end
 
-  def handle_call({:whereis_name, process_key}, _, registry) do
-    {:reply, Map.get(registry, process_key, :undefined), registry}
+  def handle_call({:register_name, process_key, pid}, _, state) do
+    response = case whereis_name(process_key) do
+      :undefined ->
+        Process.monitor(pid)
+        :ets.insert(:registry_table, {process_key, pid})
+        :yes
+
+      _ -> :no
+    end
+
+    {:reply, response, state}
   end
 
-  def handle_cast({:unregister_name, process_key}, registry) do
-    {:noreply, Map.delete(registry, process_key)}
+  def handle_cast({:unregister_name, process_key}, state) do
+    :ets.delete(:registry_table, process_key)
+    {:noreply, state}
   end
 
-  def handle_info({:DOWN, _, :process, pid, _}, registry) do
-    {:noreply, deregister_pid(registry, pid)}
-  end
-
-  defp deregister_pid(registry, pid) do
-    # We'll walk through each {key, value} item, and delete those elements whose
-    # value is identical to the provided pid.
-    Enum.reduce(
-      registry,
-      registry,
-      fn
-        ({process_key, process}, new_registry) when process == pid ->
-          Map.delete(new_registry, process_key)
-
-        (_, new_registry) -> new_registry
-      end
-    )
-
+  def handle_info({:DOWN, _, :process, pid, _}, state) do
+    :ets.match_delete(:registry_table, pid)
+    {:noreply, state}
   end
 end
