@@ -2,7 +2,7 @@ defmodule Todo.List do
   defstruct auto_id: 1, entries: %{}
 
   def new, do: %Todo.List{}
-  def new(entries \\ []) do
+  def new([_] = entries) do
     Enum.reduce(
       entries,
       %Todo.List{},
@@ -55,7 +55,7 @@ defmodule Todo.List do
     case entries[entry_id] do
       nil -> todo_list
 
-      old_entry ->
+      _old_entry ->
         new_entries = Map.delete(entries, entry_id)
         %Todo.List{todo_list | entries: new_entries}
     end
