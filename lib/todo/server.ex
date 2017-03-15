@@ -7,11 +7,11 @@ defmodule Todo.Server do
   end
 
   defp via_tuple(name) do
-    {:via, Todo.ProcessRegistry, {:todo_server, name}}
+    {:via, :global, {:todo_server, name}}
   end
 
   def whereis(name) do
-    Todo.ProcessRegistry.whereis_name({:todo_server, name})
+    :global.whereis_name({:todo_server, name})
   end
 
   def init(name) do
