@@ -14,7 +14,6 @@ defmodule Todo.Cache do
     case Todo.Server.whereis(list_name) do
       :undefined -> create_server(list_name)
       pid -> pid
-      pid -> pid
     end
   end
 
